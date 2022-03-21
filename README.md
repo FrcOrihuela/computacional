@@ -1,2 +1,2 @@
 # computacional
-Cositas de Fisica Computaciona
+Cositas de Fisica Computacional
