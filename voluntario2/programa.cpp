@@ -14,17 +14,10 @@ using namespace std;
 int main(void){
 
 
-   //Declaro la matriz de las interacciones que depende de las coordenadas de las 2 neuronas que interactuan
-   float W[50][50][50][50];
-   //La matriz de las neuronas
-   int S[50][50];
-   //Umbral de disparo
-   float disp[50][50];
-   //Patron inicial
-   int P[50][50];
+
 
    //Variables varias
-   float deformacion, T, a, deltaH, p, e, ji;
+   float deformacion, T, a, H[2], deltaH, p, e, ji;
    //float solapamiento;
    int x, y, i, j, k, l, m, contador, N, N2, generador;
    bool aleatorio;
@@ -35,12 +28,24 @@ int main(void){
    condini.open("condini.txt");
    estados.open("evolucionsist.txt");
 
-    srand( time(NULL) );
 
    //Numero de Neuronas
 
-   N=32;
+   N=20;
    N2=N*N;
+
+   //Declaro la matriz de las interacciones que depende de las coordenadas de las 2 neuronas que interactuan
+   float W[N2][N2];
+   //Explico aqui el funcionamiento de esta matriz. Como el compilador no me dejaba crear una matriz de dimension 4 he decido
+   //Insertar todo en esta matriz. Funciona de la siguiente forma cuando se vea en el programa:
+   //i*N es la fila, j la columna de forma que W[N*i+j][k*N+l] es la interacción entre la Neurona (i,j) y la (k,l)
+
+   //La matriz de las neuronas
+   int S[50][50];
+   //Umbral de disparo
+   float disp[50][50];
+   //Patron inicial
+   int P[50][50];
 
    //Metemos el patron inicial en P
    for(i=0;i<N;i++){
@@ -52,6 +57,7 @@ int main(void){
    //Parametro aleatorio? true si aleatorio false si coger un patron
 
    aleatorio=false;
+   srand( time(NULL) );
 
    //Temperatura?
 
@@ -70,7 +76,7 @@ int main(void){
       }
    }else{
       //Parametro de deformacion
-      deformacion=0.5;
+      deformacion=0.01;
       for(i=0;i<N;i++){
          for(j=0;j<N;j++){
             S[i][j]=P[i][j];
@@ -89,13 +95,14 @@ int main(void){
 
    //Metemos el estado inicial en el fichero de estados
 
-   for(i=0;i<N;i++){
+/*   for(i=0;i<N;i++){
       for(j=0;j<N-1;j++){
          estados<<P[i][j]<<", ";
       }
       estados<<P[i][N-1]<<"\n";
    }
 
+*/
 
    //Calculo el valor de a del patron introducido
 
@@ -114,7 +121,11 @@ int main(void){
       for(j=0;j<N;j++){
          for(k=0;k<N;k++){
             for(l=0;l<N;l++){
-               W[i][j][k][l]=1/N2*(P[i][j]-a)*(P[k][l]-a);
+               if (i==k&&j==l){
+                  W[N*i+j][k*N+l]=0;
+               }else{
+                  W[N*i+j][k*N+l]=1/N2*(P[i][j]-a)*(P[k][l]-a);
+               }
             }
          }
       }
@@ -127,7 +138,7 @@ int main(void){
          disp[i][j]=0;
          for(k=0;k<N;k++){
             for(l=0;l<N;l++){
-               disp[i][j]=disp[i][j]+W[i][j][k][l];
+               disp[i][j]=disp[i][j]+W[i*N+j][k*N+l];
             }
          }
          disp[i][j]=disp[i][j]/2;
@@ -136,6 +147,8 @@ int main(void){
 
    contador=0;
 
+
+//Comienza el proceso
    for(m=0;m<100*N2;m++){
       //Genero las 2 coordenadas aleatorias
       x=rand()%(N+1);
@@ -151,15 +164,13 @@ int main(void){
          contador++;
       }
 
-         
-      deltaH=0;
 
       for(k=0;k<N;k++){
          for(l=0;l<N;l++){
-            deltaH=deltaH+W[x][y][k][l]*S[x][y]*S[k][l];
+            deltaH=deltaH+(W[x*N+y][k*N+l]*S[k][l]);
          }
       }
-      deltaH=deltaH*2;
+      deltaH=(1-2*S[x][y])*(disp[x][y])*(1/2+S[x][y]-deltaH);
 
       e=exp(-deltaH/T);
       if(e>1){
