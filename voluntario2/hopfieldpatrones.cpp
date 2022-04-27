@@ -3,59 +3,80 @@
 #include <fstream>
 #include <cstdlib>
 #include <ctime>
-#include <vector>
-#include <array>
+
 
 
 using namespace std;
 
-
-
-//Explico aqui el funcionamiento de esta matriz. Como el compilador no me dejaba crear una matriz de dimension 4 he decido
-//Insertar todo en esta matriz. Funciona de la siguiente forma cuando se vea en el programa:
-//i*N es la fila, j la columna de forma que W[N*i+j][k*N+l] es la interacción entre la Neurona (i,j) y la (k,l)
+//int RandomInt(int min, int max);
 
 static float W[4096][4096];
 
+
+
 int main(void){
 
-
-
-
    //Variables varias
-   double deformacion, T, a, deltaH, p, e, ji, solap;
+   double deformacion, T, a[4], H[2], deltaH, p, e, ji, solap[4];
    //float solapamiento;
-   int x, y, i, j, k, l, m, contador, N, N2, generador;
+   int x, y, i, j, k, l, m, contador, N, N2, generador, Cp;
    bool aleatorio;
    
-   ifstream condini;
-   ofstream sistema, solapamiento, dependetemp;
+   //Cp es la cantidad de patrones que tenemos en cuenta
+   Cp=3;
 
-   condini.open("sans64.txt");
-   sistema.open("evolucionpatron.txt");
-   solapamiento.open("solapamiento.txt");
-   dependetemp.open("dependenciatemp.txt");
+   ifstream patron0,patron1,patron2,patron3;
+   ofstream sistema, solapamiento;
+
+   patron0.open("sans64.txt");
+   patron1.open("papyrus64.txt");
+   patron2.open("champinon64.txt");
+   //patron3.open("patron3.txt");
+
+   sistema.open("patrones.txt");
+   solapamiento.open("solapamientoS.txt");
+
    //Numero de Neuronas
 
    N=64;
    N2=N*N;
 
    //Declaro la matriz de las interacciones que depende de las coordenadas de las 2 neuronas que interactuan
+   //Explico aqui el funcionamiento de esta matriz. Como el compilador no me dejaba crear una matriz de dimension 4 he decido
+   //Insertar todo en esta matriz. Funciona de la siguiente forma cuando se vea en el programa:
+   //i*N es la fila, j la columna de forma que W[N*i+j][k*N+l] es la interacción entre la Neurona (i,j) y la (k,l)
 
- 
    //La matriz de las neuronas
-   short int S[N][N];
+   int S[N][N];
    //Umbral de disparo
-   float disp[N][N];
+   double disp[N][N];
    //Patron inicial
-   short int P[N][N];
+   int P[4][N2];
 
    //Metemos el patron inicial en P
    for(i=0;i<N;i++){
       for(j=0;j<N;j++){
-         condini>>P[i][j];
+         patron0>>P[0][i*N+j];
       }
    }
+   for(i=0;i<N;i++){
+      for(j=0;j<N;j++){
+         patron1>>P[1][i*N+j];
+      }
+   }
+
+   for(i=0;i<N;i++){
+      for(j=0;j<N;j++){
+         patron2>>P[2][i*N+j];
+      }
+   }
+
+   for(i=0;i<N;i++){
+      for(j=0;j<N;j++){
+         patron3>>P[3][i*N+j];
+      }
+   }
+
 
    //Parametro aleatorio? true si aleatorio false si coger un patron
 
@@ -64,15 +85,12 @@ int main(void){
 
    //Temperatura?
 
-   T=0.0001;
-
-
-  // while(T<0.1){
+   T=0.001;
 
    if(aleatorio==true){
       for(i=0;i<N;i++){
          for(j=0;j<N;j++){
-            generador=rand()%(1001);;
+            generador=rand()%(1000);;
             if(generador<500){
                S[i][j]=0;
             }else{
@@ -82,10 +100,10 @@ int main(void){
       }
    }else{
       //Parametro de deformacion
-      deformacion=0.8;
+      deformacion=0.2;
       for(i=0;i<N;i++){
          for(j=0;j<N;j++){
-            S[i][j]=P[i][j];
+            S[i][j]=P[2][N*i+j];
          }
       }
       //el parametro de deformacion me dice el porcentaje de cuadros a los que les cambio el signo
@@ -103,10 +121,10 @@ int main(void){
 
    for(i=0;i<N;i++){
       for(j=0;j<N-1;j++){
-         sistema<<P[i][j]<<", ";
+         sistema<<S[i][j]<<", ";
          sistema.flush();
       }
-      sistema<<P[i][N-1]<<"\n";
+      sistema<<S[i][N-1]<<"\n";
       
    }
    sistema<<"\n";
@@ -114,26 +132,29 @@ int main(void){
 
 
    //Calculo el valor de a del patron introducido
-
-   a=0;
+   for(m=0;m<4;m++){
+   a[m]=0;
 
    for(i=0;i<N;i++){
       for(j=0;j<N;j++){
-         a=a+1.0*P[i][j];
+         a[m]=a[m]+1.0*P[m][i*N+j];
       }
    }
-   a=a/N2;
-
+   a[m]=a[m]/N2;
+   }
    //Pasamos a calcular el valor de las interacciones entre neuronas
 
    for(i=0;i<N;i++){
       for(j=0;j<N;j++){
          for(k=0;k<N;k++){
             for(l=0;l<N;l++){
+               W[N*i+j][k*N+l]=0;
                if ((i==k)&&(j==l)){
                   W[N*i+j][k*N+l]=0;
                }else{
-                  W[N*i+j][k*N+l]=1.0/N2*(1.0*P[i][j]-a)*(1.0*P[k][l]-a);
+                  for(m=0;m<Cp;m++){
+                  W[N*i+j][k*N+l]=W[N*i+j][k*N+l]+1.0/N2*(1.0*P[m][i*N+j]-a[m])*(1.0*P[m][k*N+l]-a[m]);
+                  }
                }
             }
          }
@@ -163,21 +184,30 @@ if(sistema.is_open()){
       y=rand()%(N);
 
       if(m%N2 ==0){
-      solap=0;
+      for(k=0;k<Cp;k++){
+         solap[k]=0;
+         for(j=0;j<N;j++){
+            for(i=0;i<N-1;i++){
+               solap[k]=solap[k]+(P[k][j*N+i]-a[k])*(S[j][i]-a[k]);
+            }
+         }
+         
+      solap[k]=solap[k]/(N2*a[k]*(1-a[k]));
+      }
 
          for(j=0;j<N;j++){
                for(i=0;i<N-1;i++){
                   sistema<<S[j][i]<<", ";
                   sistema.flush();
-                  solap=solap+(P[j][i]-a)*(S[j][i]-a);
+                  
                }
                sistema<<S[j][N-1]<<"\n";
             }sistema<<"\n";
-      solap=solap/(N2*a*(1-a));
+
       sistema.flush();
 
       
-      solapamiento<<m<<"\t"<<solap<<"\n";
+      solapamiento<<m<<"\t"<<solap[0]<<"\t"<<solap[1]<<"\t"<<solap[2]<<"\n";
       solapamiento.flush();
       }
       deltaH=0;
@@ -208,14 +238,12 @@ if(sistema.is_open()){
 
    }
 }
-//dependetemp<<log10(T)<< "\t" <<solap<<"\n";
-//dependetemp.flush();
-//T=T+0.0005;
-//}
-   condini.close();
+   patron0.close();
+   patron1.close();
+   patron2.close();
+  // patron3.close();
    sistema.close();
-   solapamiento.close();
-   dependetemp.close();
+
 
    return 0;
 }
