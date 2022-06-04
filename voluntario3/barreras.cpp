@@ -156,7 +156,7 @@ for(h=0;h<iteraciones;h++){
         phi[j]=phi[j]/cnorm;
     }
 
-
+/*
     vnorma=0;
 
     for(k=0;k<=anchopozo;k++){
@@ -168,7 +168,7 @@ for(h=0;h<iteraciones;h++){
     norma<<1<<"\t"<<sqrt(vnorma)<<"\n";
     estados.flush();
     norma.flush();
-
+*/
     contador=1;
     salir=0;
     while(salir==0){
@@ -200,7 +200,7 @@ for(h=0;h<iteraciones;h++){
 
      
 
-
+/*
         vnorma=0;
         //Meto la iteracion en el txt de resultados y calcula la norma
         for(k=0;k<=anchopozo;k++){
@@ -212,7 +212,7 @@ for(h=0;h<iteraciones;h++){
         norma<<contador<<"\t"<<sqrt(vnorma)<<"\n";
         estados.flush();
         norma.flush();
-
+*/
 
 
 
