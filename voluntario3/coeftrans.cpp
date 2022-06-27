@@ -24,7 +24,7 @@ int main (void){
     int j,k,n,N,nciclos, iteraciones, h, mT, nD, contador, salir;
     //N nos da el ancho del pozo
 
-    N=1000;
+    N=500;
 
     //numero de ciclos
 
@@ -65,7 +65,7 @@ int main (void){
     sgor=1/(4*k0gor*k0gor);
     //calculo el paso entre puntos
     paso=2*k0gor;
-    lambda=2;
+    lambda=1;
     nD=500; //TIEMPO PARA QUE PUEDA APARECER UN MÁXIMO AL OTRO LADO DE LA BARRERA DE POTENCIAL
 
 
@@ -114,7 +114,7 @@ int main (void){
     beta[N]=0;
 
 
-for(h=0;h<2;h++){
+for(h=0;h<iteraciones;h++){
 
 
     //Calculamos el estado inicial
@@ -252,7 +252,7 @@ for(h=0;h<2;h++){
 
     
     //Primero calculo las derivadas utilizando fórmulas de derivación numerica
-
+    
     dphi[0]=phi[1]/e;
     dphi[N]=(phi[N]-phi[N-1])/paso;
     ddphi[0]=0;

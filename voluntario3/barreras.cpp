@@ -24,7 +24,7 @@ int main (void){
     int j,k,n,N,nciclos, iteraciones, h, mT, nD, contador, salir, nbarreras, anchopozo, indice;
     //N nos da el ancho del pozo
 
-    nbarreras=2;
+    nbarreras=1;
     N=500;
     anchopozo=N+2*N/5*(nbarreras-1);
 
@@ -67,8 +67,8 @@ int main (void){
     sgor=1/(4*k0gor*k0gor);
     //calculo el paso entre puntos
     paso=2*k0gor;
-    lambda=0.75;
-    nD=500*anchopozo/N; //TIEMPO PARA QUE PUEDA APARECER UN MÁXIMO AL OTRO LADO DE LA BARRERA DE POTENCIAL
+    lambda=0.5;
+    nD=round(2000*(nbarreras*0.5)); //TIEMPO PARA QUE PUEDA APARECER UN MÁXIMO AL OTRO LADO DE LA BARRERA DE POTENCIAL
 
 
     //Definimos el potencial
@@ -212,8 +212,8 @@ for(h=0;h<iteraciones;h++){
         norma<<contador<<"\t"<<sqrt(vnorma)<<"\n";
         estados.flush();
         norma.flush();
-*/
 
+*/
 
 
 
@@ -273,6 +273,11 @@ for(h=0;h<iteraciones;h++){
         }
 
     
+    }
+
+
+    if(contador>4*nD){
+        salir=1;
     }
 
     //Calculo de valores esperados de operadores:
