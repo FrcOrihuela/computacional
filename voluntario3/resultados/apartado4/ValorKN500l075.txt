@@ -1,0 +1,4 @@
+Valor de K:	0.749
+Probabilidad promedio:	0.734705
+Desviación Típica:	0.433589
+Error:	0.0274225
